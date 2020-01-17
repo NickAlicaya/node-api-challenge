@@ -35,7 +35,7 @@ router.get('/:id',validateProjectID,(req,res) => {
 //Post new project
 //yahoo it works
 
-router.post('/',(req,res) => {
+router.post('/',validateProject,(req,res) => {
     const {name, description} = req.body
     projDb.insert(req.body)
     .then(project => {
@@ -104,6 +104,17 @@ function validateProjectID(req, res, next) {
         }
       })
       .catch(err => res.status(500).json(Error_Message));
+  }
+
+function validateProject(req, res, next) {
+    const {name,description} = req.body;
+    if (!name || !description) {
+      res.status(400).json({ message: "Missing name or description" });
+    } else if (typeof name || description !== "string") {
+      res.status(400).json({error: "Invalid name or description."})  
+    } else {
+        next();
+    }
   }
 
 module.exports = router;

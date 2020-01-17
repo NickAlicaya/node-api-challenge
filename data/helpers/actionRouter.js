@@ -34,7 +34,7 @@ router.get('/:id',validateActionID,(req,res) => {
 
 //Post to add a new action
 //WORKS AGAIN BWAHAHAHA!
-router.post('/',(req,res) => {
+router.post('/',validateAction,(req,res) => {
     const {project_id, description, notes} = req.body
     actDb.insert(req.body)
     .then(action => {
@@ -93,6 +93,17 @@ router.put('/:id',validateActionID,(req,res) => {
       .catch(err =>
         res.status(500).json("Error getting action")
       );
+  }
+
+  function validateAction(req, res, next) {
+    const {description,notes} = req.body;
+    if (!description || !notes) {
+      res.status(400).json({ message: "Missing description or notes" });
+    } else if (typeof name || description !== "string") {
+      res.status(400).json({error: "Invalid  description or notes."})  
+    } else {
+        next();
+    }
   }
 
 module.exports = router;
