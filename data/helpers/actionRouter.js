@@ -21,7 +21,7 @@ router.get('/',(req,res) => {
 
 // Get action with specific ID
 //works
-router.get('/:id',(req,res) => {
+router.get('/:id',validateActionID,(req,res) => {
     actDb.get(req.params.id)
     .then(action => {
         res.status(200).json(action);
@@ -49,7 +49,7 @@ router.post('/',(req,res) => {
 //DELETES an action based on id
 //HELL YEAH it WORKS!
 
-router.delete('/:id',(req,res) => {
+router.delete('/:id',validateActionID,(req,res) => {
     actDb.remove(req.params.id)
      .then(action => {
    res.status(202).json({message: "action has been deleted."});
@@ -61,9 +61,10 @@ router.delete('/:id',(req,res) => {
 });
 
 //FINALLY A Put request to update actions
-//Works, adding middlewares soon.
+//Works, need to do middleware for fun
 
-router.put('/:id',(req,res) => {
+
+router.put('/:id',validateActionID,(req,res) => {
     actDb.update(req.params.id,req.body)
     .then(action => {
         res.status(200).json({message:`Successfully updated action with id`})
@@ -73,5 +74,25 @@ router.put('/:id',(req,res) => {
         res.status(500).json({error: "Could not update action."})
     })
 })
+
+
+//middleware
+
+  function validateActionID(req, res, next) {
+      const id = req.params.id
+    actDb
+      .get(id)
+      .then(action => {
+        if (action) {
+          req.action = action;
+          next();
+        } else {
+          res.status(404).json({ error: `Action with id: ${id} not found` });
+        }
+      })
+      .catch(err =>
+        res.status(500).json("Error getting action")
+      );
+  }
 
 module.exports = router;

@@ -20,7 +20,7 @@ router.get('/',(req,res) => {
 //Get request to project with specified id
 //works!!!
 
-router.get('/:id',(req,res) => {
+router.get('/:id',validateProjectID,(req,res) => {
     projDb.get(req.params.id)
     .then(project => {
         res.status(200).json(project);
@@ -50,7 +50,7 @@ router.post('/',(req,res) => {
 //DELETES a project based on id
 //HELL YEAH it WORKS!
 
-router.delete('/:id',(req,res) => {
+router.delete('/:id',validateProjectID,(req,res) => {
     projDb.remove(req.params.id)
      .then(project => {
    res.status(202).json({message: "project has been deleted."});
@@ -78,7 +78,7 @@ router.get('/projectactions/:id', (req,res) => {
 //Put request to edit projects
 // ALL CRUD OPERATIONS TESTED AND WORKING!
 
-router.put('/:id',(req,res) => {
+router.put('/:id',validateProjectID,(req,res) => {
     projDb.update(req.params.id,req.body)
     .then(action => {
         res.status(200).json({message:`Successfully updated project with id`})
@@ -88,5 +88,22 @@ router.put('/:id',(req,res) => {
         res.status(500).json({error: "Could not update project."})
     })
 })
+
+
+//middleware
+function validateProjectID(req, res, next) {
+      const id = req.params.id
+    projDb
+      .get(id)
+      .then(project => {
+        if (project) {
+          req.project = project;
+          next();
+        } else {
+          res.status(404).json({ error: `Project ${id} not found` });
+        }
+      })
+      .catch(err => res.status(500).json(Error_Message));
+  }
 
 module.exports = router;
